@@ -1,5 +1,5 @@
 /**
- * GIFT HUB 초청 회신 API (이스트엔드 영업마케팅실)
+ * THE PRIVATE EDIT 초청 회신 API (이스트엔드 영업마케팅실)
  *  - 초대장(GitHub Pages)  → doPost action=rsvp     : 참석/미참석 회신 저장
  *  - 초대장                → doGet  action=guest    : 개인 링크 코드로 이름·이전 회신 조회
  *  - 대시보드              → doGet  action=list     : 명단 + 회신 전체 (관리자 토큰)
@@ -13,7 +13,7 @@ var RSVP_SHEET = '회신';
 var GUEST_HEAD = ['No', '인플루언서', '팔로워', '채널', '담당자', '코드', '비고'];
 var RSVP_HEAD = ['회신시각', '코드', '이름', '인스타ID', '참석', '동반', '경로'];
 var ADMIN_HASH = 'c078b98e4985c204ffca201ab126a2577476f3bf1b62744ae82b93421c8908f2';
-var SHEET_TITLE = 'GIFT HUB 11.25 초청 회신 (비공개)';
+var SHEET_TITLE = 'THE PRIVATE EDIT 11.25 초청 회신 (비공개)';
 
 /** 처음 한 번 실행: 비공개 시트 만들기(이미 있으면 탭만 점검) */
 function setup() {

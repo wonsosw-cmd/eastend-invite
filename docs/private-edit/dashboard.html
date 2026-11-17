@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<title>GIFT HUB 초청 현황</title>
+<title>THE PRIVATE EDIT 초청 현황</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Noto+Sans+KR:wght@400;500;700&display=swap">
@@ -102,7 +102,7 @@ h1{margin:4px 0 0;font-family:var(--f-num);font-weight:500;font-size:34px;line-h
 <body>
 <div class="login wrapLogin" id="login" hidden>
   <div class="eyebrow">Internal</div>
-  <div style="font-family:var(--f-num);font-size:26px">GIFT HUB 초청 현황</div>
+  <div style="font-family:var(--f-num);font-size:26px">THE PRIVATE EDIT 초청 현황</div>
   <label for="tok" style="font-size:13px;color:var(--taupe)">관리자 토큰</label>
   <input id="tok" type="password" autocomplete="current-password">
   <button class="btn solid" id="loginBtn" type="button">열기</button>
@@ -113,7 +113,7 @@ h1{margin:4px 0 0;font-family:var(--f-num);font-weight:500;font-size:34px;line-h
   <div class="top">
     <div>
       <div class="eyebrow">Internal · 인플루언서 초청 현황</div>
-      <h1>GIFT HUB 11.25</h1>
+      <h1>THE PRIVATE EDIT 11.25</h1>
       <div class="meta" id="meta">불러오는 중…</div>
     </div>
     <div class="bar">
@@ -150,7 +150,7 @@ h1{margin:4px 0 0;font-family:var(--f-num);font-weight:500;font-size:34px;line-h
     <div id="umList" class="unmatched"></div>
   </section>
 
-  <div class="foot">회신은 비공개 구글 시트(「GIFT HUB 11.25 초청 회신」)에 쌓이고, 이 화면은 1분마다 새로 불러옵니다. 같은 사람이 여러 번 보내면 마지막 회신을 씁니다.</div>
+  <div class="foot">회신은 비공개 구글 시트(「THE PRIVATE EDIT 11.25 초청 회신」)에 쌓이고, 이 화면은 1분마다 새로 불러옵니다. 같은 사람이 여러 번 보내면 마지막 회신을 씁니다.</div>
 </main>
 <div class="toast" id="toast" hidden></div>
 
@@ -160,7 +160,7 @@ h1{margin:4px 0 0;font-family:var(--f-num);font-weight:500;font-size:34px;line-h
   var API = CFG.API_URL || '', BASE = CFG.INVITE_BASE || location.href.replace(/dashboard\.html.*$/, '');
   var EVENT_DAY = Date.UTC(2026,10,25), DEADLINE = Date.UTC(2026,10,20);
   var $ = function(id){ return document.getElementById(id); };
-  var KEY = 'gifthub_admin_token', token = '', data = null, filter = 'all', openMark = null, timer = null;
+  var KEY = 'private_edit_admin_token', token = '', data = null, filter = 'all', openMark = null, timer = null;
 
   function lsGet(){ try { return localStorage.getItem(KEY) || ''; } catch(e){ return ''; } }
   function lsSet(v){ try { v ? localStorage.setItem(KEY, v) : localStorage.removeItem(KEY); } catch(e){} }
@@ -170,7 +170,7 @@ h1{margin:4px 0 0;font-family:var(--f-num);font-weight:500;font-size:34px;line-h
   function fmt(ts){ if(!ts) return ''; var d=new Date(new Date(ts).getTime()+9*3600e3); var p=function(n){return (n<10?'0':'')+n;}; return (d.getUTCMonth()+1)+'/'+d.getUTCDate()+' '+p(d.getUTCHours())+':'+p(d.getUTCMinutes()); }
   function linkFor(g){ return BASE + '?g=' + encodeURIComponent(g.code); }
   function dmFor(g){
-    return '안녕하세요 ' + g.name + '님, 시티브리즈·아티드입니다.\n11월 25일(수) 저녁 한남 플래그십에서 열리는 연말 초청 행사 GIFT HUB에 모시고 싶어 초대장을 보내드려요.\n아래 링크에서 11월 20일(금)까지 참석 여부를 알려 주세요.\n' + linkFor(g);
+    return '안녕하세요 ' + g.name + '님, 시티브리즈·아티드입니다.\n11월 25일(수) 저녁 한남 플래그십에서 열리는 연말 초청 행사 THE PRIVATE EDIT에 모시고 싶어 초대장을 보내드려요.\n아래 링크에서 11월 20일(금)까지 참석 여부를 알려 주세요.\n' + linkFor(g);
   }
   function copy(text, okMsg){
     var done=function(){ toast(okMsg); };
@@ -293,7 +293,7 @@ h1{margin:4px 0 0;font-family:var(--f-num);font-weight:500;font-size:34px;line-h
       lines.push([x.g.no, x.g.name, x.g.followers, x.g.manager, x.st==='Y'?'참석':x.st==='N'?'미참석':'미회신', x.r&&x.r.companions?1:0, x.r?fmt(x.r.ts):'', x.r?x.r.via:'', linkFor(x.g)]);
     });
     var csv = '﻿' + lines.map(function(l){ return l.map(function(v){ v=String(v==null?'':v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v; }).join(','); }).join('\r\n');
-    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'})); a.download = 'GIFT_HUB_초청현황.csv'; document.body.appendChild(a); a.click(); a.remove();
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'})); a.download = 'THE_PRIVATE_EDIT_초청현황.csv'; document.body.appendChild(a); a.click(); a.remove();
   });
   $('openInvite').href = BASE;
 
