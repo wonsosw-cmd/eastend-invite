@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>GIFT HUB 초청 현황</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<script src="config.js"></script>
+<style>
+/* Layout: internal status board. Summary strip first (counts + one stacked bar), then filter chips, then one row per guest; rows become cards under 640px. */
+:root{
+  --bg:#F5F1E8; --card:#FBF8F1; --ink:#242424; --taupe:#6B655A; --mute:#8E887C;
+  --line:rgba(158,161,165,.45); --butter:#E9DDA9; --butter-deep:#CDBB72; --silver:#C6C8CA;
+  --yes:#242424; --no:#A9A39A; --wait:#E9DDA9; --warn:#A65D4E;
+  --f-num:"DM Serif Display",Georgia,serif;
+  --f-ui:"Pretendard","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font-family:var(--f-ui);font-size:14px;line-height:1.55;word-break:keep-all;-webkit-font-smoothing:antialiased}
+.wrap{max-width:980px;margin:0 auto;padding-block:28px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:22px}
+.eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.22em;color:var(--taupe);text-transform:uppercase}
+h1{margin:4px 0 0;font-family:var(--f-num);font-weight:500;font-size:34px;line-height:1.1;letter-spacing:.02em}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.top .meta{font-size:12.5px;color:var(--taupe);margin-top:6px;font-variant-numeric:tabular-nums}
+.btn{appearance:none;font:inherit;font-size:13px;font-weight:500;cursor:pointer;color:var(--ink);background:var(--card);border:1px solid rgba(36,36,36,.22);padding:8px 14px;min-height:38px}
+.btn:hover{background:var(--butter)}
+.btn.solid{background:var(--ink);color:var(--butter);border-color:var(--ink)}
+.btn:focus-visible,.chip:focus-visible,input:focus-visible,.mini:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+/* summary */
+.sum{background:var(--card);border:1px solid var(--line);padding:20px;display:flex;flex-direction:column;gap:16px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.kpi{display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi .l{font-size:12px;color:var(--taupe);display:flex;align-items:center;gap:6px}
+.kpi .l i{width:9px;height:9px;display:inline-block}
+.kpi .v{font-family:var(--f-num);font-size:38px;line-height:1.05;font-variant-numeric:tabular-nums}
+.kpi .s{font-size:12px;color:var(--mute)}
+.stack{display:flex;height:12px;background:#ECE6D8;overflow:hidden}
+.stack span{display:block;height:100%}
+.goal{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12.5px;color:var(--taupe)}
+.goal b{color:var(--ink)}
+.sw-yes{background:var(--yes)} .sw-no{background:var(--no)} .sw-wait{background:var(--wait);box-shadow:inset 0 0 0 1px var(--butter-deep)}
+
+/* filters */
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{appearance:none;font:inherit;font-size:13px;cursor:pointer;background:transparent;color:var(--ink);border:1px solid rgba(36,36,36,.22);padding:6px 12px;border-radius:999px;font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--butter);border-color:var(--ink)}
+.search{flex:1 1 180px;min-width:0;font:inherit;font-size:14px;border:0;border-bottom:1px solid rgba(36,36,36,.3);background:transparent;padding:6px 2px}
+
+/* list */
+.list{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:34px minmax(0,1.5fr) 70px minmax(0,1fr) 120px minmax(0,1.1fr);gap:12px;align-items:center;padding-block:12px;border-bottom:1px solid var(--line)}
+.head{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--mute);padding-block:8px}
+.no{font-variant-numeric:tabular-nums;color:var(--mute);font-size:12.5px}
+.nm{font-weight:700;font-size:15px;min-width:0}
+.nm a{font-weight:400;font-size:12px;color:var(--taupe);text-decoration:none;border-bottom:1px solid var(--line);margin-left:6px;white-space:nowrap}
+.nm .note{display:block;font-weight:400;font-size:12px;color:var(--warn)}
+.fol{font-variant-numeric:tabular-nums;color:var(--taupe)}
+.mgr{color:var(--taupe);font-size:13px;min-width:0}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;padding:4px 10px;white-space:nowrap}
+.pill.yes{background:var(--yes);color:var(--butter)}
+.pill.no{background:transparent;color:var(--taupe);box-shadow:inset 0 0 0 1px var(--no)}
+.pill.wait{background:var(--wait);color:var(--ink)}
+.when{display:block;font-size:11.5px;color:var(--mute);margin-top:3px;font-variant-numeric:tabular-nums}
+.acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.mini{appearance:none;font:inherit;font-size:12px;cursor:pointer;background:var(--card);border:1px solid rgba(36,36,36,.2);padding:5px 9px;color:var(--ink)}
+.mini:hover{background:var(--butter)}
+.mini.done{background:var(--ink);color:var(--butter)}
+.mark{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;padding-top:6px}
+.empty{padding:28px 0;color:var(--taupe);text-align:center}
+
+.unmatched{display:flex;flex-direction:column;gap:8px}
+.unmatched h2{margin:0;font-size:15px}
+.um{background:var(--card);border:1px solid var(--line);padding:10px 12px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:13px}
+
+.login{max-width:380px;margin:12vh auto 0;background:var(--card);border:1px solid var(--line);padding:26px;display:flex;flex-direction:column;gap:14px}
+.login input{font:inherit;font-size:15px;border:1px solid rgba(36,36,36,.3);background:#fff;padding:10px}
+.err{color:var(--warn);font-size:13px;min-height:1em}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--butter);padding:10px 16px;font-size:13px;z-index:5}
+.foot{font-size:11.5px;color:var(--mute)}
+
+@media (max-width:640px){
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .head{display:none}
+  .row{grid-template-columns:28px minmax(0,1fr) auto;grid-template-areas:"no nm st" "no mgr st" "ac ac ac";row-gap:4px}
+  .row .no{grid-area:no;align-self:start;padding-top:2px}
+  .row .nm{grid-area:nm}
+  .row .fol{display:none}
+  .row .mgr{grid-area:mgr;font-size:12px}
+  .row .st{grid-area:st;text-align:right}
+  .row .acts{grid-area:ac;justify-content:flex-start;padding-top:6px}
+  .mark{justify-content:flex-start}
+}
+</style>
+</head>
+<body>
+<div class="login wrapLogin" id="login" hidden>
+  <div class="eyebrow">Internal</div>
+  <div style="font-family:var(--f-num);font-size:26px">GIFT HUB 초청 현황</div>
+  <label for="tok" style="font-size:13px;color:var(--taupe)">관리자 토큰</label>
+  <input id="tok" type="password" autocomplete="current-password">
+  <button class="btn solid" id="loginBtn" type="button">열기</button>
+  <div class="err" id="loginErr"></div>
+</div>
+
+<main class="wrap" id="app" hidden>
+  <div class="top">
+    <div>
+      <div class="eyebrow">Internal · 인플루언서 초청 현황</div>
+      <h1>GIFT HUB 11.25</h1>
+      <div class="meta" id="meta">불러오는 중…</div>
+    </div>
+    <div class="bar">
+      <a class="btn" id="openInvite" target="_blank" rel="noopener">초대장 보기</a>
+      <button class="btn" id="csvBtn" type="button">CSV 받기</button>
+      <button class="btn solid" id="reload" type="button">새로고침</button>
+    </div>
+  </div>
+
+  <section class="sum" aria-label="요약">
+    <div class="kpis">
+      <div class="kpi"><span class="l"><i class="sw-yes"></i>참석</span><span class="v" id="kYes">–</span><span class="s" id="kYesS">&nbsp;</span></div>
+      <div class="kpi"><span class="l"><i class="sw-no"></i>미참석</span><span class="v" id="kNo">–</span><span class="s">&nbsp;</span></div>
+      <div class="kpi"><span class="l"><i class="sw-wait"></i>미회신</span><span class="v" id="kWait">–</span><span class="s" id="kWaitS">&nbsp;</span></div>
+      <div class="kpi"><span class="l">초청</span><span class="v" id="kAll">–</span><span class="s">명단 기준</span></div>
+    </div>
+    <div class="stack" id="stack" role="img" aria-label="참석·미참석·미회신 비율"></div>
+    <div class="goal"><span id="goal1">메인 게스트 목표 15명</span><span id="goal2">동반 포함 최대 30명</span></div>
+  </section>
+
+  <div class="bar" role="group" aria-label="상태 거르기">
+    <button class="chip" data-f="all" aria-pressed="true" type="button">전체</button>
+    <button class="chip" data-f="Y" aria-pressed="false" type="button">참석</button>
+    <button class="chip" data-f="N" aria-pressed="false" type="button">미참석</button>
+    <button class="chip" data-f="W" aria-pressed="false" type="button">미회신</button>
+    <input class="search" id="q" type="search" placeholder="이름·담당자 찾기" aria-label="이름이나 담당자로 찾기">
+  </div>
+
+  <div class="list" id="list" aria-live="polite"></div>
+
+  <section class="unmatched" id="umBox" hidden>
+    <h2>명단과 짝이 안 맞는 회신</h2>
+    <div class="foot">개인 링크 없이 이름·인스타 ID를 적어 보낸 회신 중 명단의 인스타 주소와 맞지 않은 것입니다.</div>
+    <div id="umList" class="unmatched"></div>
+  </section>
+
+  <div class="foot">회신은 비공개 구글 시트(「GIFT HUB 11.25 초청 회신」)에 쌓이고, 이 화면은 1분마다 새로 불러옵니다. 같은 사람이 여러 번 보내면 마지막 회신을 씁니다.</div>
+</main>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+  var CFG = window.GH_CONFIG || {};
+  var API = CFG.API_URL || '', BASE = CFG.INVITE_BASE || location.href.replace(/dashboard\.html.*$/, '');
+  var EVENT_DAY = Date.UTC(2026,10,25), DEADLINE = Date.UTC(2026,10,20);
+  var $ = function(id){ return document.getElementById(id); };
+  var KEY = 'gifthub_admin_token', token = '', data = null, filter = 'all', openMark = null, timer = null;
+
+  function lsGet(){ try { return localStorage.getItem(KEY) || ''; } catch(e){ return ''; } }
+  function lsSet(v){ try { v ? localStorage.setItem(KEY, v) : localStorage.removeItem(KEY); } catch(e){} }
+  function toast(t){ var el=$('toast'); el.textContent=t; el.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(function(){ el.hidden=true; },1800); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function kstDay(ms){ var d=new Date(ms+9*3600e3); return Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()); }
+  function fmt(ts){ if(!ts) return ''; var d=new Date(new Date(ts).getTime()+9*3600e3); var p=function(n){return (n<10?'0':'')+n;}; return (d.getUTCMonth()+1)+'/'+d.getUTCDate()+' '+p(d.getUTCHours())+':'+p(d.getUTCMinutes()); }
+  function linkFor(g){ return BASE + '?g=' + encodeURIComponent(g.code); }
+  function dmFor(g){
+    return '안녕하세요 ' + g.name + '님, 시티브리즈·아티드입니다.\n11월 25일(수) 저녁 한남 플래그십에서 열리는 연말 초청 행사 GIFT HUB에 모시고 싶어 초대장을 보내드려요.\n아래 링크에서 11월 20일(금)까지 참석 여부를 알려 주세요.\n' + linkFor(g);
+  }
+  function copy(text, okMsg){
+    var done=function(){ toast(okMsg); };
+    var fallback=function(){ var ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); done(); }catch(e){ toast('복사가 막혔습니다. 길게 눌러 복사해 주세요'); } document.body.removeChild(ta); };
+    try { navigator.clipboard.writeText(text).then(done, fallback); } catch(e){ fallback(); }
+  }
+
+  function api(qs){ return fetch(API + '?' + qs, {cache:'no-store'}).then(function(r){ return r.json(); }); }
+  function post(body){ return fetch(API, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body)}).then(function(r){ return r.json(); }); }
+
+  function load(silent){
+    if (!silent) $('meta').textContent = '불러오는 중…';
+    return api('action=list&token=' + encodeURIComponent(token)).then(function(j){
+      if (!j || !j.ok) {
+        if (j && j.msg === 'auth') { lsSet(''); showLogin('토큰이 맞지 않습니다.'); return; }
+        $('meta').textContent = '불러오지 못했습니다: ' + ((j && j.msg) || '알 수 없는 오류'); return;
+      }
+      data = j; render();
+    }).catch(function(){ $('meta').textContent = '연결이 불안정합니다. 새로고침을 눌러 주세요.'; });
+  }
+
+  function merged(){
+    var last = {}, um = [];
+    data.responses.forEach(function(r){ if (r.code) last[r.code] = r; else um.push(r); });
+    var rows = data.guests.map(function(g){
+      var r = last[g.code]; var st = !r || r.attend === 'CLEAR' ? 'W' : r.attend;
+      return { g:g, r: st==='W' ? null : r, st: st };
+    });
+    var umLast = {}; um.forEach(function(r){ umLast[(r.insta||r.name).toLowerCase()] = r; });
+    return { rows: rows, um: Object.keys(umLast).map(function(k){ return umLast[k]; }) };
+  }
+
+  function render(){
+    var m = merged(), rows = m.rows;
+    var yes = rows.filter(function(x){ return x.st==='Y'; }), no = rows.filter(function(x){ return x.st==='N'; }), wait = rows.filter(function(x){ return x.st==='W'; });
+    var comp = yes.reduce(function(s,x){ return s + (x.r.companions||0); }, 0);
+    var umYes = m.um.filter(function(r){ return r.attend==='Y'; });
+    var umHead = umYes.reduce(function(s,r){ return s + 1 + (r.companions||0); }, 0);
+    var total = rows.length || 1;
+
+    $('kYes').textContent = yes.length; $('kNo').textContent = no.length; $('kWait').textContent = wait.length; $('kAll').textContent = rows.length;
+    $('kYesS').textContent = '동반 ' + comp + '명 · 총 ' + (yes.length + comp) + '명';
+    var dl = Math.round((DEADLINE - kstDay(Date.now()))/864e5), ev = Math.round((EVENT_DAY - kstDay(Date.now()))/864e5);
+    $('kWaitS').textContent = dl >= 0 ? '마감까지 ' + dl + '일' : '마감 지남';
+    $('stack').innerHTML = '<span class="sw-yes" style="width:'+(yes.length/total*100)+'%"></span><span class="sw-no" style="width:'+(no.length/total*100)+'%"></span><span class="sw-wait" style="width:'+(wait.length/total*100)+'%"></span>';
+    $('goal1').innerHTML = '메인 게스트 목표 15명 중 <b>' + yes.length + '명</b> 참석' + (umYes.length ? ' (명단 밖 참석 ' + umYes.length + '명 별도)' : '');
+    $('goal2').innerHTML = '동반 포함 <b>' + (yes.length + comp + umHead) + '명</b> / 최대 30명';
+    $('meta').textContent = '행사 11/25(수) 18:00 · ' + (ev > 0 ? 'D-' + ev : ev === 0 ? 'D-DAY' : '종료') + ' · 회신 마감 11/20(금) · ' + fmt(data.now) + ' 기준';
+
+    Array.prototype.forEach.call(document.querySelectorAll('.chip'), function(c){
+      var f = c.dataset.f, n = f==='all' ? rows.length : f==='Y' ? yes.length : f==='N' ? no.length : wait.length;
+      c.textContent = (f==='all'?'전체':f==='Y'?'참석':f==='N'?'미참석':'미회신') + ' ' + n;
+    });
+
+    var q = $('q').value.trim().toLowerCase();
+    var shown = rows.filter(function(x){
+      if (filter !== 'all' && x.st !== filter) return false;
+      if (q && (x.g.name + ' ' + x.g.manager).toLowerCase().indexOf(q) < 0) return false;
+      return true;
+    });
+    var h = '<div class="row head"><span>No.</span><span>인플루언서</span><span>팔로워</span><span>담당자</span><span>상태</span><span style="text-align:right">보내기 · 직접 표시</span></div>';
+    if (!shown.length) h += '<div class="empty">' + (rows.length ? '조건에 맞는 사람이 없습니다.' : '명단이 비어 있습니다. 명단을 먼저 넣어 주세요.') + '</div>';
+    shown.forEach(function(x){
+      var g = x.g, ch = /youtube/i.test(g.url) ? '유튜브' : /instagram/i.test(g.url) ? '인스타' : '';
+      var pill = x.st==='Y' ? '<span class="pill yes">참석' + (x.r.companions ? ' · 동반 1' : '') + '</span>'
+               : x.st==='N' ? '<span class="pill no">미참석</span>' : '<span class="pill wait">미회신</span>';
+      var when = x.r ? '<span class="when">' + fmt(x.r.ts) + ' · ' + esc(x.r.via) + '</span>' : '';
+      var isOpen = openMark === g.code;
+      h += '<div class="row" data-code="' + esc(g.code) + '">'
+        + '<span class="no">' + esc(g.no) + '</span>'
+        + '<span class="nm">' + esc(g.name) + (ch && /^https?:/.test(g.url) ? '<a href="' + esc(g.url) + '" target="_blank" rel="noopener">' + ch + '</a>' : '')
+        + (g.note ? '<span class="note">' + esc(g.note) + '</span>' : '') + '</span>'
+        + '<span class="fol">' + esc(g.followers) + '</span>'
+        + '<span class="mgr">' + (g.manager ? esc(g.manager) : '<span style="color:var(--mute)">미정</span>') + '</span>'
+        + '<span class="st">' + pill + when + '</span>'
+        + '<span class="acts">'
+        +   '<button class="mini" data-act="link" type="button">링크 복사</button>'
+        +   '<button class="mini" data-act="dm" type="button">DM 문구 복사</button>'
+        +   '<button class="mini' + (isOpen ? ' done' : '') + '" data-act="mark" type="button" aria-expanded="' + isOpen + '">직접 표시</button>'
+        +   (isOpen ? '<span class="mark" style="flex-basis:100%">'
+              + '<button class="mini" data-set="Y0" type="button">참석</button>'
+              + '<button class="mini" data-set="Y1" type="button">참석+동반</button>'
+              + '<button class="mini" data-set="N" type="button">미참석</button>'
+              + '<button class="mini" data-set="CLEAR" type="button">미회신으로</button></span>' : '')
+        + '</span></div>';
+    });
+    $('list').innerHTML = h;
+
+    $('umBox').hidden = !m.um.length;
+    $('umList').innerHTML = m.um.map(function(r){
+      return '<div class="um"><span><b>' + esc(r.name) + '</b> @' + esc(r.insta) + '</span><span>' + (r.attend==='Y' ? '참석' + (r.companions ? ' · 동반 1' : '') : '미참석') + ' · ' + fmt(r.ts) + '</span></div>';
+    }).join('');
+  }
+
+  $('list').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if (!b) return;
+    var row = b.closest('.row'); if (!row || !data) return;
+    var g = data.guests.filter(function(x){ return x.code === row.dataset.code; })[0]; if (!g) return;
+    if (b.dataset.act === 'link') copy(linkFor(g), g.name + '님 링크를 복사했습니다');
+    else if (b.dataset.act === 'dm') copy(dmFor(g), g.name + '님 DM 문구를 복사했습니다');
+    else if (b.dataset.act === 'mark') { openMark = openMark === g.code ? null : g.code; render(); }
+    else if (b.dataset.set) {
+      var s = b.dataset.set, body = { action:'set', token: token, g: g.code, attend: s==='CLEAR' ? 'CLEAR' : s.charAt(0), companions: s==='Y1' ? 1 : 0 };
+      b.disabled = true;
+      post(body).then(function(j){
+        if (j && j.ok) { toast(g.name + '님 상태를 바꿨습니다'); openMark = null; load(true); }
+        else { toast('저장하지 못했습니다: ' + ((j && j.msg) || '')); b.disabled = false; }
+      }).catch(function(){ toast('연결이 불안정합니다'); b.disabled = false; });
+    }
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.chip'), function(c){
+    c.addEventListener('click', function(){ filter = c.dataset.f; Array.prototype.forEach.call(document.querySelectorAll('.chip'), function(x){ x.setAttribute('aria-pressed', x===c ? 'true':'false'); }); render(); });
+  });
+  $('q').addEventListener('input', function(){ if (data) render(); });
+  $('reload').addEventListener('click', function(){ load(false); });
+  $('csvBtn').addEventListener('click', function(){
+    if (!data) return;
+    var lines = [['No','인플루언서','팔로워','담당자','상태','동반','회신시각','경로','개인링크']];
+    merged().rows.forEach(function(x){
+      lines.push([x.g.no, x.g.name, x.g.followers, x.g.manager, x.st==='Y'?'참석':x.st==='N'?'미참석':'미회신', x.r&&x.r.companions?1:0, x.r?fmt(x.r.ts):'', x.r?x.r.via:'', linkFor(x.g)]);
+    });
+    var csv = '﻿' + lines.map(function(l){ return l.map(function(v){ v=String(v==null?'':v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v; }).join(','); }).join('\r\n');
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'})); a.download = 'GIFT_HUB_초청현황.csv'; document.body.appendChild(a); a.click(); a.remove();
+  });
+  $('openInvite').href = BASE;
+
+  function showLogin(msg){ $('app').hidden = true; $('login').hidden = false; $('loginErr').textContent = msg || ''; clearInterval(timer); }
+  function start(){ $('login').hidden = true; $('app').hidden = false; load(false); clearInterval(timer); timer = setInterval(function(){ if (!document.hidden) load(true); }, 60000); }
+  $('loginBtn').addEventListener('click', function(){ token = $('tok').value.trim(); if (!token) return; lsSet(token); start(); });
+  $('tok').addEventListener('keydown', function(e){ if (e.key === 'Enter') $('loginBtn').click(); });
+
+  var hm = location.hash.match(/k=([^&]+)/);
+  if (hm) { token = decodeURIComponent(hm[1]); lsSet(token); try { history.replaceState(null, '', location.pathname + location.search); } catch(e){} }
+  else token = lsGet();
+  if (!API) { $('login').hidden = false; $('loginErr').textContent = '설정(config.js)에 API 주소가 없습니다.'; }
+  else if (token) start(); else showLogin('');
+})();
+</script>
+</body>
+</html>
